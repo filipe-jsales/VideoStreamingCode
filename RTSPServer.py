@@ -93,6 +93,7 @@ class RTSPServer:
 
             # Codifica o frame como JPEG
             _, buffer = cv2.imencode('.jpg', frame)
+            print(f"Pacote RTP sendo enviado. Tamanho do buffer: {len(buffer)} bytes")
 
             # Divide o buffer em pacotes menores
             buffer = buffer.tobytes()

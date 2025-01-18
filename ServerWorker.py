@@ -9,6 +9,7 @@ class ServerWorker:
 	PLAY = 'PLAY'
 	PAUSE = 'PAUSE'
 	TEARDOWN = 'TEARDOWN'
+	DESCRIBE = 'DESCRIBE'
 	
 	INIT = 0
 	READY = 1
@@ -33,8 +34,8 @@ class ServerWorker:
 		while True:            
 			data = connSocket.recv(256)
 			if data:
-				print("Data received:\n" + data)
-				self.processRtspRequest(data)
+				print("Data received:\n" + data.decode("utf-8"))
+				self.processRtspRequest(data.decode("utf-8"))
 	
 	def processRtspRequest(self, data):
 		"""Process RTSP request sent from the client."""
@@ -106,6 +107,12 @@ class ServerWorker:
 			
 			# Close the RTP socket
 			self.clientInfo['rtpSocket'].close()
+		
+		# Process DESCRIBE request
+		elif requestType == self.DESCRIBE:
+			print("processing DESCRIBE\n")
+
+			self.replyRtsp(self.OK_200, seq[1], describe=True)
 			
 	def sendRtp(self):
 		"""Send RTP packets over UDP."""
@@ -125,9 +132,9 @@ class ServerWorker:
 					self.clientInfo['rtpSocket'].sendto(self.makeRtp(data, frameNumber),(address,port))
 				except:
 					print("Connection Error")
-					#print '-'*60
+					#print('-'*60)
 					#traceback.print_exc(file=sys.stdout)
-					#print '-'*60
+					#print('-'*60)
 
 	def makeRtp(self, payload, frameNbr):
 		"""RTP-packetize the video data."""
@@ -146,13 +153,19 @@ class ServerWorker:
 		
 		return rtpPacket.getPacket()
 		
-	def replyRtsp(self, code, seq):
+	def replyRtsp(self, code, seq, describe=False):
 		"""Send RTSP reply to the client."""
 		if code == self.OK_200:
-			#print "200 OK"
+			#print("200 OK")
 			reply = 'RTSP/1.0 200 OK\nCSeq: ' + seq + '\nSession: ' + str(self.clientInfo['session'])
+			if describe:
+				reply += '\n\n'
+				reply += 'protocol=RTP\n'
+				reply += 'version=2\n'
+				reply += 'stream=video\n'
+				reply += 'type=mjpeg\n'
 			connSocket = self.clientInfo['rtspSocket'][0]
-			connSocket.send(reply)
+			connSocket.send(reply.encode())
 		
 		# Error messages
 		elif code == self.FILE_NOT_FOUND_404:

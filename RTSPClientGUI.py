@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import messagebox
 import cv2
 import numpy as np
+from PIL import Image, ImageTk  # Adicione isso no topo do arquivo
+
 
 class RTSPClientGUI:
     def __init__(self, root, server_address, server_port, rtp_port):
@@ -115,14 +117,14 @@ class RTSPClientGUI:
             try:
                 data, _ = self.rtp_socket.recvfrom(65536)
                 print("Pacote RTP recebido.")
-                frame = np.frombuffer(data, dtype=np.uint8)
-                frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-
+                frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+                print(f"FRAMEEEE{frame}")
                 if frame is not None:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    frame = cv2.resize(frame, (640, 480))
-
-                    img_tk = tk.PhotoImage(master=self.root, image=tk.PhotoImage(data=frame))
+                    print(f"Frame processado e exibido. Tamanho: {frame.shape}")
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Converte para RGB
+                    frame = cv2.resize(frame, (640, 480))  # Redimensiona o frame
+                    img = Image.fromarray(frame)  # Converte para formato PIL
+                    img_tk = ImageTk.PhotoImage(image=img)  # Converte para formato compatível com Tkinter
                     self.video_label.configure(image=img_tk)
                     self.video_label.image = img_tk
             except socket.timeout:
