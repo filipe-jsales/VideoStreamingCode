@@ -98,13 +98,7 @@ class Client:
 			except:
 				if self.playEvent.isSet(): 
 					break
-				
-				
-				# Upon receiving ACK for TEARDOWN request,
-				# close the RTP socket
 
-				# Upon receiving ACK for TEARDOWN request,
-				# close the RTP socket
 				if self.teardownAcked == 1:
 					self.rtpSocket.shutdown(socket.SHUT_RDWR)
 					self.rtpSocket.close()
@@ -139,34 +133,13 @@ class Client:
 			threading.Thread(target=self.recvRtspReply).start()
 		elif requestCode == self.PLAY and self.state == self.READY:
 			print('to be implemented')
-			# Update RTSP sequence number.
-			# ...
-			
-			# Write the RTSP request to be sent.
-			# request = ...
-			
-			# Keep track of the sent request.
-			# self.requestSent = ...
-		
-		# Pause request
+
 		elif requestCode == self.PAUSE and self.state == self.PLAYING:
 			print('to be implemented')
-			# Update RTSP sequence number.
-			# ...
-			
-		
-			# Keep track of the sent request.
-			# self.requestSent = ...
-			
-		# Teardown request
+
 		elif requestCode == self.TEARDOWN and not self.state == self.INIT:
 			print('to be implemented')
-			# Update RTSP sequence number.
-			# ...
-			
 
-		# Send the RTSP request using rtspSocket.
-		# ...
 		
 		print('\nData sent:\n' + request)
 	
